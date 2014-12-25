@@ -18,7 +18,7 @@ public class Scratch {
 		Transformer transformer = tFactory.newTransformer();
 
 		DOMSource source = new DOMSource(document);
-		StreamResult result = new StreamResult(System.out);
+		StreamResult result = new StreamResult(new File("C:\\Users\\jeff_000\\Desktop\\fur_elise.mxl.xml"));
 		transformer.transform(source, result);
 	}
 
@@ -38,6 +38,6 @@ public class Scratch {
 
 		Walker walker = new Walker();
 		walker.walk(music);
-		// show(music);
+		show(music);
 	}
 }
