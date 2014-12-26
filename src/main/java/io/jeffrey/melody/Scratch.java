@@ -2,11 +2,6 @@ package io.jeffrey.melody;
 
 import java.io.File;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 
 public class Scratch {
@@ -24,9 +19,7 @@ public class Scratch {
 		}
 
 		Document music = Import.isolateMusicXML(file);
-
 		Walker walker = new Walker();
 		walker.walk(music);
-		
 	}
 }

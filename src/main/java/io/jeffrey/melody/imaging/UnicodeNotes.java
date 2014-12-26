@@ -5,11 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 public class UnicodeNotes {
 	private static String utf(int codePoint) {
@@ -44,10 +41,10 @@ public class UnicodeNotes {
 		CrossedOutTinyNote(utf(0x1D194)), //
 		TinyNote(utf(0x1D195)); //
 
-		public String str;
+		public final String str;
 
-		private Note(String str) {
-			this.str = str;
+		private Note(String _str) {
+			this.str = _str;
 		}
 	}
 
@@ -56,7 +53,7 @@ public class UnicodeNotes {
 	private final Graphics graphics;
 	private final Map<Note, Rectangle2D> sizes;
 
-	public final int halfNoteWidth;
+	public final int noteWidth;
 	public final int halfNoteHeight;
 
 	public UnicodeNotes(Font font) throws Exception {
@@ -89,8 +86,12 @@ public class UnicodeNotes {
 				}
 			}
 		}
-		this.halfNoteWidth = 1 + (int) Math.ceil(whole.getWidth() / 2.0);
-		this.halfNoteHeight = 1 + (int) Math.ceil((maxY - minY) / 2.0);
+		this.noteWidth = (int) Math.ceil(whole.getWidth());
+		this.halfNoteHeight = (int) Math.ceil((maxY - minY) / 2.0);
+	}
+
+	public double width(Note note) {
+		return sizes.get(note).getWidth();
 	}
 
 	public void plot(Note note, int x, int y, Graphics graphics) {

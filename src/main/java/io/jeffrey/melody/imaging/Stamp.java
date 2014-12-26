@@ -4,7 +4,6 @@ import io.jeffrey.melody.imaging.UnicodeNotes.Note;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,23 +24,15 @@ public class Stamp {
 		UnicodeNotes notes = new UnicodeNotes(f);
 		Staff s = new Staff(notes);
 
-		System.out.println(":" + f.getName());
 		g.setColor(Color.BLACK);
 		g.setFont(f);
-		
-		s.drawStaff(g, 50, 0, 256);
+		s.drawStaff(g, Note.TrebelClef, 4, 50, 0, 256);
 		notes.plot(Note.Note_1_1, 50, 50, g);
 		notes.plot(Note.Flat, Note.Note_1_1, 50, 50, g);
-
 		notes.plot(Note.Note_1_1, 75, 50 + notes.halfNoteHeight, g);
-		notes.plot(Note.Sharp, Note.Note_1_1, 100, 50 + notes.halfNoteHeight*2, g);
-
+		notes.plot(Note.Sharp, Note.Note_1_1, 100, 50 + notes.halfNoteHeight * 2, g);
 		g.drawLine(0, 50, 256, 50);
-
 		g.dispose();
-
-		ImageIO.write(img, "png", new File(
-				"C:\\Users\\jeff_000\\Desktop\\todo.png"));
-
+		ImageIO.write(img, "png", new File("C:\\Users\\jeff_000\\Desktop\\todo.png"));
 	}
 }

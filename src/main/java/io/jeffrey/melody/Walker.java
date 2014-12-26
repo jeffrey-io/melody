@@ -18,7 +18,7 @@ public class Walker {
 	private int numberParts = 0;
 	private MeasureWalk measureWalker;
 
-	public Walker() {
+	public Walker() throws Exception {
 		this.measureWalker = new MeasureWalk();
 	}
 
@@ -55,9 +55,11 @@ public class Walker {
 			// pull out tempo
 			return;
 		}
-		if("backup".equals(name)) {
-			int backup = Integer.parseInt(			Mapify.asStringMap(node).get("duration"));
+		if ("backup".equals(name)) {
+			int backup = Integer.parseInt(Mapify.asStringMap(node).get(
+					"duration"));
 			measureWalker.backup(backup);
+			return;
 		}
 		if ("note".equals(name)) {
 			Note current = new Note(node, priorNote);

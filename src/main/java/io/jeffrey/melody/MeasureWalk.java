@@ -1,6 +1,7 @@
 package io.jeffrey.melody;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -8,20 +9,19 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
+import io.jeffrey.melody.imaging.UnicodeNotes;
 import io.jeffrey.melody.xml.Note;
 import io.jeffrey.melody.xml.Pitch;
 import io.jeffrey.melody.xml.Pitch.Step;
 
 public class MeasureWalk {
 
-	BufferedImage image;
-	Graphics graphics;
+	private final BufferedImage image;
+	private final Graphics graphics;
+	private UnicodeNotes notes;
+	
 	private final int width;
 	private final int height;
-
-	private final int yMiddleC;
-	private final int halfNoteHeight = 10;
-	private final int halfNoteWidth = 14;
 	private final int durationStep = 12;
 	private int measureId = 0;
 
@@ -29,31 +29,31 @@ public class MeasureWalk {
 
 	private class Staff {
 		private final int y;
-		private final int direction;
 
-		private Staff(int y, int direction) {
+		private Staff(int y) {
 			this.y = y;
-			this.direction = direction;
 		}
 	}
 
 	private HashMap<Integer, Staff> staffs;
 
-	public MeasureWalk() {
+	public MeasureWalk() throws Exception{
 		this.width = 1024;
 		this.height = 1024;
 		this.image = new BufferedImage(width, height,
 				BufferedImage.TYPE_INT_RGB);
 		this.graphics = image.getGraphics();
-		this.yMiddleC = 512;
+		System.out.println("Start notes");
+		this.notes = new UnicodeNotes(new Font("Bravura", Font.PLAIN, 48));
 		this.staffs = new HashMap<Integer, MeasureWalk.Staff>();
-		staffs.put(1, new Staff(512, -1));
-		staffs.put(2, new Staff(700, 1));
+		System.out.println("here");
+		staffs.put(1, new Staff(512));
+		staffs.put(2, new Staff(700));
 	}
 
 	private int y(Step step, int octave, int staff) {
 		int offset = (step.asInteger - Step.C.asInteger + (octave - 4) * 7)
-				* halfNoteHeight;
+				* notes.halfNoteHeight;
 
 		Staff S = staffs.get(staff);
 
@@ -66,13 +66,12 @@ public class MeasureWalk {
 
 	public void noteAt(int x, int y) {
 		graphics.setColor(Color.BLACK);
-		graphics.fillOval(x - halfNoteWidth, y - halfNoteHeight,
-				2 * halfNoteWidth, 2 * halfNoteHeight);
-		graphics.drawLine(x - halfNoteHeight * 2, y, x + halfNoteHeight * 2, y);
+		notes.plot(UnicodeNotes.Note.Note_1_16, x, y, graphics);
+		graphics.drawLine(x - 4, y, x + notes.noteWidth+4, y);
 	}
 
 	public void begin() {
-		x = 2 * halfNoteWidth;
+		x = notes.noteWidth;
 		graphics.setColor(Color.WHITE);
 		graphics.fillRect(0, 0, width, height);
 
