@@ -5,8 +5,11 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 public class UnicodeNotes {
 	private static String utf(int codePoint) {
@@ -24,6 +27,9 @@ public class UnicodeNotes {
 		Rest_1_16(utf(0x1D13F)), //
 		Rest_1_32(utf(0x1D140)), //
 		Rest_1_64(utf(0x1D141)), //
+
+		Stemless_1_2(utf(0x1D157)), //
+		Stemless_1_4(utf(0x1D158)), //
 
 		Note_1_1(utf(0x1D15D)), //
 		Note_1_2(utf(0x1D15E)), //
@@ -86,9 +92,50 @@ public class UnicodeNotes {
 				}
 			}
 		}
+		graphics.setColor(Color.WHITE);
+		graphics.fillRect(0, 0, 128, 128);
+		graphics.setColor(Color.BLACK);
+		int atY = 1 + (int) whole.getHeight();
+		graphics.drawString(Note.Note_1_4.str, 0, atY);
+		graphics.setColor(Color.WHITE);
+		graphics.drawString(Note.Stemless_1_4.str, 0, atY);
+
 		this.noteWidth = (int) Math.ceil(whole.getWidth());
 		this.halfNoteHeight = (int) Math.ceil((maxY - minY) / 2.0);
+
+		minY = 100000;
+		maxY = -1;
+		int minX = 100000;
+		int maxX = -1;
+
+		for (int x = 0; x <= whole.getWidth() * 2; x++) {
+			for (int y = 0; y <= whole.getHeight() + Math.abs(whole.getY()) + 1; y++) {
+				Color at = new Color(scratch.getRGB(x, y));
+				if (at.getBlue() < 1) {
+					minX = Math.min(minX, x);
+					maxX = Math.max(maxX, x);
+				}
+			}
+		}
+		for (int x = maxX - 1; x <= whole.getWidth() * 2; x++) {
+			for (int y = 0; y <= whole.getHeight() + Math.abs(whole.getY()) + 1; y++) {
+				Color at = new Color(scratch.getRGB(x, y));
+				if (at.getBlue() < 8) {
+					minY = Math.min(minY, y);
+					maxY = Math.max(maxY, y);
+				}
+			}
+		}
+
+		upstemOffsetX = (int) ((minX + maxX * 9) / 10.0);
+		upstemOffsetY = minY - atY;
+		stemHeight = maxY - minY;
 	}
+
+	public final int upstemOffsetX;
+	public final int upstemOffsetY;
+
+	public final int stemHeight;
 
 	public double width(Note note) {
 		return sizes.get(note).getWidth();
@@ -104,5 +151,18 @@ public class UnicodeNotes {
 		graphics.drawString(a.str,
 				(int) Math.ceil(x - sizes.get(a).getWidth() - 1), y);
 		graphics.drawString(b.str, x, y);
+	}
+
+	public void stem(boolean down, int x, int y, Graphics graphics) {
+		if (down) {
+			for (int dx = 0; dx < 2; dx++) {
+				graphics.drawLine(x + dx, y, x + dx, y + stemHeight);
+			}
+		} else {
+			for (int dx = 0; dx < 2; dx++) {
+				graphics.drawLine(dx + x + upstemOffsetX, y + upstemOffsetY, dx
+						+ x + upstemOffsetX, y + upstemOffsetY + stemHeight);
+			}
+		}
 	}
 }

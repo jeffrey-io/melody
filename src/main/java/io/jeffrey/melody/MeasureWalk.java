@@ -89,9 +89,12 @@ public class MeasureWalk {
 	}
 
 	public void note(Note note) {
+		note.set(x, y(note.pitch, note.staff));
+		/*
 		if (note.pitch != null) {
 			noteAt(x, y(note.pitch, note.staff));
 		}
+		*/
 		x += note.duration * durationStep;
 	}
 
