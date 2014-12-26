@@ -11,17 +11,6 @@ import org.w3c.dom.Document;
 
 public class Scratch {
 
-	private static void show(Document document) throws Exception {
-
-		// Use a Transformer for output
-		TransformerFactory tFactory = TransformerFactory.newInstance();
-		Transformer transformer = tFactory.newTransformer();
-
-		DOMSource source = new DOMSource(document);
-		StreamResult result = new StreamResult(new File("C:\\Users\\jeff_000\\Desktop\\fur_elise.mxl.xml"));
-		transformer.transform(source, result);
-	}
-
 	public static void main(String[] args) throws Exception {
 
 		if (args.length == 0) {
@@ -38,6 +27,6 @@ public class Scratch {
 
 		Walker walker = new Walker();
 		walker.walk(music);
-		show(music);
+		
 	}
 }

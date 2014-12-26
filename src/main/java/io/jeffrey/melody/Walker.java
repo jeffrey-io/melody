@@ -1,5 +1,8 @@
 package io.jeffrey.melody;
 
+import io.jeffrey.melody.xml.Note;
+import io.jeffrey.melody.xml.helpers.Mapify;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +16,11 @@ public class Walker {
 	private static final Set<String> ignore = new HashSet<String>(
 			Arrays.asList("credit", "identification", "print"));
 	private int numberParts = 0;
+	private MeasureWalk measureWalker;
+
+	public Walker() {
+		this.measureWalker = new MeasureWalk();
+	}
 
 	public void walk(Document document) throws Exception {
 		numberParts = 0;
@@ -26,22 +34,38 @@ public class Walker {
 			walk(nodeList.item(k));
 	}
 
-	private void startMeasure() throws Exception {
-		System.out.println("Starting measure:");
-	}
+	private Note priorNote = new Note();
 
 	private void measurePart(Node node) throws Exception {
 		if (node.getNodeType() == Node.TEXT_NODE)
 			return;
 		String name = node.getNodeName().toLowerCase();
+
+		if ("print".equals(name)) {
+			return;
+		}
+		if ("barline".equals(name)) {
+			return;
+		}
+		if ("attributes".equals(name)) {
+			// pull out data about the measure
+			return;
+		}
+		if ("direction".equals(name)) {
+			// pull out tempo
+			return;
+		}
+		if("backup".equals(name)) {
+			int backup = Integer.parseInt(			Mapify.asStringMap(node).get("duration"));
+			measureWalker.backup(backup);
+		}
+		if ("note".equals(name)) {
+			Note current = new Note(node, priorNote);
+			measureWalker.note(current);
+			priorNote = current;
+			return;
+		}
 		System.out.println("+ " + name);
-		
-	}
-
-	private void endMeasure() throws Exception {
-		System.out.println("Ending Measure");
-		throw new Exception("err");
-
 	}
 
 	public void walk(Node node) throws Exception {
@@ -63,17 +87,17 @@ public class Walker {
 		} else if ("score-part".equals(name)) {
 			numberParts++;
 			if (numberParts > 1)
-				throw new Exception();
+				throw new Exception("Melody only supports one part for now");
 			return;
 		} else if ("part".equals(name)) {
 		} else if ("".equals(name)) {
 		} else if ("".equals(name)) {
 		} else if ("measure".equals(name)) {
 			NodeList nodeList = node.getChildNodes();
-			startMeasure();
+			measureWalker.begin();
 			for (int k = 0; k < nodeList.getLength(); k++)
 				measurePart(nodeList.item(k));
-			endMeasure();
+			measureWalker.end();
 			return;
 		} else {
 			System.out.println("unhandled:" + name);
