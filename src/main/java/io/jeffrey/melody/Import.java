@@ -7,18 +7,39 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class Import {
 
 	private static Document parse(byte[] raw) throws Exception {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		dBuilder.setErrorHandler(new ErrorHandler() {
+			
+			public void warning(SAXParseException arg0) throws SAXException {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void fatalError(SAXParseException arg0) throws SAXException {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void error(SAXParseException arg0) throws SAXException {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		return dBuilder.parse(new ByteArrayInputStream(raw));
 	}
 

@@ -1,6 +1,6 @@
 package io.jeffrey.melody;
 
-import io.jeffrey.melody.xml.Note;
+import io.jeffrey.melody.data.NoteStruct;
 import io.jeffrey.melody.xml.helpers.Mapify;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public class Walker {
 			walk(nodeList.item(k));
 	}
 
-	private Note priorNote = new Note();
+	private NoteStruct priorNote = new NoteStruct();
 
 	private void measurePart(Node node) throws Exception {
 		if (node.getNodeType() == Node.TEXT_NODE)
@@ -62,7 +62,7 @@ public class Walker {
 			return;
 		}
 		if ("note".equals(name)) {
-			Note current = new Note(node, priorNote);
+			NoteStruct current = new NoteStruct(node, priorNote);
 			measureWalker.note(current);
 			priorNote = current;
 			return;

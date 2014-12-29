@@ -1,4 +1,4 @@
-package io.jeffrey.melody.xml;
+package io.jeffrey.melody.data;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,25 +7,18 @@ import io.jeffrey.melody.xml.helpers.Mapify;
 
 import org.w3c.dom.Node;
 
-public class Note {
+public class NoteStruct {
 
-	public int x;
-	public int y;
-	
 	public Pitch pitch;
 	public boolean rest;
 	public boolean tieStart;
 	public boolean tieEnd;
-
 	public boolean chord;
-
 	public int duration;
 	public int staff;
 	public HashMap<Integer, String> beams;
 
-	public Note() {
-		this.x = 0;
-		this.y = 0;
+	public NoteStruct() {
 		this.pitch = null;
 		this.rest = false;
 		this.tieStart = false;
@@ -36,17 +29,12 @@ public class Note {
 		this.beams = new HashMap<Integer, String>();
 	}
 
-	public Note(Note last) {
+	public NoteStruct(NoteStruct last) {
 		this.duration = last.duration;
 		this.staff = last.staff;
 	}
-	
-	public void set(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
 
-	public Note(Node node, Note last) {
+	public NoteStruct(Node node, NoteStruct last) {
 		this(last);
 		Map<String, Node> easy = Mapify.asMap(node);
 

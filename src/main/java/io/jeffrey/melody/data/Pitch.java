@@ -1,4 +1,4 @@
-package io.jeffrey.melody.xml;
+package io.jeffrey.melody.data;
 
 import java.util.Map;
 

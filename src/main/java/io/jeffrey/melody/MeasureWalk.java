@@ -9,17 +9,18 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
+import io.jeffrey.melody.data.NoteStruct;
+import io.jeffrey.melody.data.Pitch;
+import io.jeffrey.melody.data.Pitch.Step;
+import io.jeffrey.melody.imaging.Measure;
 import io.jeffrey.melody.imaging.UnicodeNotes;
-import io.jeffrey.melody.xml.Note;
-import io.jeffrey.melody.xml.Pitch;
-import io.jeffrey.melody.xml.Pitch.Step;
 
 public class MeasureWalk {
 
 	private final BufferedImage image;
 	private final Graphics graphics;
 	private UnicodeNotes notes;
-	
+
 	private final int width;
 	private final int height;
 	private final int durationStep = 12;
@@ -37,7 +38,7 @@ public class MeasureWalk {
 
 	private HashMap<Integer, Staff> staffs;
 
-	public MeasureWalk() throws Exception{
+	public MeasureWalk() throws Exception {
 		this.width = 1024;
 		this.height = 1024;
 		this.image = new BufferedImage(width, height,
@@ -64,41 +65,41 @@ public class MeasureWalk {
 		return y(pitch.step, pitch.octave, staff);
 	}
 
-	public void noteAt(int x, int y) {
-		graphics.setColor(Color.BLACK);
-		notes.plot(UnicodeNotes.Note.Note_1_16, x, y, graphics);
-		graphics.drawLine(x - 4, y, x + notes.noteWidth+4, y);
-	}
+	private Measure current;
 
 	public void begin() {
+		this.current = new Measure();
+		this.last = -1;
 		x = notes.noteWidth;
 		graphics.setColor(Color.WHITE);
 		graphics.fillRect(0, 0, width, height);
 
 		graphics.setColor(Color.BLACK);
-		int[] bars = new int[] { y(Step.E, 4,1), y(Step.G, 4,1), y(Step.B, 4,1),
-				y(Step.D, 5,1), y(Step.F, 5,1),  y(Step.A, 3, 2),  y(Step.F, 3, 2),  y(Step.D, 3, 2),  
+		int[] bars = new int[] { y(Step.E, 4, 1), y(Step.G, 4, 1),
+				y(Step.B, 4, 1), y(Step.D, 5, 1), y(Step.F, 5, 1),
+				y(Step.A, 3, 2), y(Step.F, 3, 2), y(Step.D, 3, 2),
 				y(Step.B, 2, 2), y(Step.G, 2, 2) };
 		for (int y : bars) {
 			graphics.drawLine(0, y, width, y);
 		}
 	}
 
+	int last = -1;
+
 	public void backup(int dX) {
 		x -= dX * durationStep;
 	}
 
-	public void note(Note note) {
-		note.set(x, y(note.pitch, note.staff));
-		/*
-		if (note.pitch != null) {
-			noteAt(x, y(note.pitch, note.staff));
+	public void note(NoteStruct note) {
+		if (last > 0 && ! note.chord) {
+			x += last * durationStep;
 		}
-		*/
-		x += note.duration * durationStep;
+		current.addNote(note, x, y(note.pitch, note.staff));
+		last = note.duration;
 	}
 
 	public void end() {
+		current.draw(graphics, notes);
 		try {
 			ImageIO.write(image, "png", new File(
 					"C:\\Users\\jeff_000\\Desktop\\measure.dump-" + measureId
