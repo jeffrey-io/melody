@@ -17,99 +17,93 @@ import io.jeffrey.melody.imaging.UnicodeNotes;
 
 public class MeasureWalk {
 
-	private final BufferedImage image;
-	private final Graphics graphics;
-	private UnicodeNotes notes;
+  private class Staff {
+    private final int y;
 
-	private final int width;
-	private final int height;
-	private final int durationStep = 12;
-	private int measureId = 0;
+    private Staff(final int y) {
+      this.y = y;
+    }
+  }
 
-	private int x;
+  private final BufferedImage           image;
+  private final Graphics                graphics;
 
-	private class Staff {
-		private final int y;
+  private final UnicodeNotes            notes;
+  private final int                     width;
+  private final int                     height;
+  private final int                     durationStep = 12;
 
-		private Staff(int y) {
-			this.y = y;
-		}
-	}
+  private int                           measureId    = 0;
 
-	private HashMap<Integer, Staff> staffs;
+  private int                           x;
 
-	public MeasureWalk() throws Exception {
-		this.width = 1024;
-		this.height = 1024;
-		this.image = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
-		this.graphics = image.getGraphics();
-		System.out.println("Start notes");
-		this.notes = new UnicodeNotes(new Font("Bravura", Font.PLAIN, 48));
-		this.staffs = new HashMap<Integer, MeasureWalk.Staff>();
-		System.out.println("here");
-		staffs.put(1, new Staff(512));
-		staffs.put(2, new Staff(700));
-	}
+  private final HashMap<Integer, Staff> staffs;
 
-	private int y(Step step, int octave, int staff) {
-		int offset = (step.asInteger - Step.C.asInteger + (octave - 4) * 7)
-				* notes.halfNoteHeight;
+  private Measure                       current;
 
-		Staff S = staffs.get(staff);
+  int                                   last         = -1;
 
-		return S.y - offset;
-	}
+  public MeasureWalk() throws Exception {
+    this.width = 1024;
+    this.height = 1024;
+    this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    this.graphics = image.getGraphics();
+    System.out.println("Start notes");
+    this.notes = new UnicodeNotes(new Font("Bravura", Font.PLAIN, 48));
+    this.staffs = new HashMap<Integer, MeasureWalk.Staff>();
+    System.out.println("here");
+    staffs.put(1, new Staff(512));
+    staffs.put(2, new Staff(700));
+  }
 
-	private int y(Pitch pitch, int staff) {
-		return y(pitch.step, pitch.octave, staff);
-	}
+  public void backup(final int dX) {
+    x -= dX * durationStep;
+  }
 
-	private Measure current;
+  public void begin() {
+    this.current = new Measure();
+    this.last = -1;
+    x = notes.noteWidth;
+    graphics.setColor(Color.WHITE);
+    graphics.fillRect(0, 0, width, height);
 
-	public void begin() {
-		this.current = new Measure();
-		this.last = -1;
-		x = notes.noteWidth;
-		graphics.setColor(Color.WHITE);
-		graphics.fillRect(0, 0, width, height);
+    graphics.setColor(Color.BLACK);
+    final int[] bars = new int[] { y(Step.E, 4, 1), y(Step.G, 4, 1), y(Step.B, 4, 1), y(Step.D, 5, 1), y(Step.F, 5, 1), y(Step.A, 3, 2), y(Step.F, 3, 2), y(Step.D, 3, 2), y(Step.B, 2, 2), y(Step.G, 2, 2) };
+    for (final int y : bars) {
+      graphics.drawLine(0, y, width, y);
+    }
+  }
 
-		graphics.setColor(Color.BLACK);
-		int[] bars = new int[] { y(Step.E, 4, 1), y(Step.G, 4, 1),
-				y(Step.B, 4, 1), y(Step.D, 5, 1), y(Step.F, 5, 1),
-				y(Step.A, 3, 2), y(Step.F, 3, 2), y(Step.D, 3, 2),
-				y(Step.B, 2, 2), y(Step.G, 2, 2) };
-		for (int y : bars) {
-			graphics.drawLine(0, y, width, y);
-		}
-	}
+  public void end() {
+    current.draw(graphics, notes);
+    try {
+      ImageIO.write(image, "png", new File("C:\\Users\\jeff_000\\Desktop\\measure.dump-" + measureId + ".png"));
+    } catch (final Exception err) {
+      err.printStackTrace();
+    }
+    if (measureId > 5) {
+      throw new RuntimeException("err");
+    }
+    measureId++;
+  }
 
-	int last = -1;
+  public void note(final NoteStruct note) {
+    if (last > 0 && !note.chord) {
+      x += last * durationStep;
+    }
+    current.addNote(note, x, y(note.pitch, note.staff));
+    last = note.duration;
+  }
 
-	public void backup(int dX) {
-		x -= dX * durationStep;
-	}
+  private int y(final Pitch pitch, final int staff) {
+    return y(pitch.step, pitch.octave, staff);
+  }
 
-	public void note(NoteStruct note) {
-		if (last > 0 && ! note.chord) {
-			x += last * durationStep;
-		}
-		current.addNote(note, x, y(note.pitch, note.staff));
-		last = note.duration;
-	}
+  private int y(final Step step, final int octave, final int staff) {
+    final int offset = (step.asInteger - Step.C.asInteger + (octave - 4) * 7) * notes.halfNoteHeight;
 
-	public void end() {
-		current.draw(graphics, notes);
-		try {
-			ImageIO.write(image, "png", new File(
-					"C:\\Users\\jeff_000\\Desktop\\measure.dump-" + measureId
-							+ ".png"));
-		} catch (Exception err) {
-			err.printStackTrace();
-		}
-		if (measureId > 5) {
-			throw new RuntimeException("err");
-		}
-		measureId++;
-	}
+    final Staff S = staffs.get(staff);
+
+    return S.y - offset;
+  }
 }

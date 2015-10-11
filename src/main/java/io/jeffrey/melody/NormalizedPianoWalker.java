@@ -11,18 +11,16 @@ import org.w3c.dom.NodeList;
 import io.jeffrey.melody.data.NoteStruct;
 import io.jeffrey.melody.xml.helpers.Mapify;
 
-public class Walker {
+public abstract class NormalizedPianoWalker {
   private static final Set<String> ignore      = new HashSet<String>(Arrays.asList("credit", "identification", "print"));
   HashSet<String>                  names       = new HashSet<String>();
   private int                      numberParts = 0;
-  private final MeasureWalk        measureWalker;
-
   private NoteStruct               priorNote   = new NoteStruct();
 
-  public Walker() throws Exception {
-    this.measureWalker = new MeasureWalk();
+  public NormalizedPianoWalker(Document document) throws Exception {
+    walk(document);
   }
-
+  
   private void measurePart(final Node node) throws Exception {
     if (node.getNodeType() == Node.TEXT_NODE) {
       return;
@@ -44,27 +42,27 @@ public class Walker {
       return;
     }
     if ("backup".equals(name)) {
-      final int backup = Integer.parseInt(Mapify.asStringMap(node).get("duration"));
-      measureWalker.backup(backup);
+      final int duration = Integer.parseInt(Mapify.asStringMap(node).get("duration"));
+      backup(duration);
       return;
     }
     if ("note".equals(name)) {
       final NoteStruct current = new NoteStruct(node, priorNote);
-      measureWalker.note(current);
       priorNote = current;
+      note(current);
       return;
     }
-    System.out.println("+ " + name);
+    unknown(name);
   }
 
-  public void walk(final Document document) throws Exception {
+  private void walk(final Document document) throws Exception {
     numberParts = 0;
     if (document.hasChildNodes()) {
       walk(document.getChildNodes());
     }
   }
 
-  public void walk(final Node node) throws Exception {
+  private void walk(final Node node) throws Exception {
     final String name = node.getNodeName().toLowerCase();
 
     if (ignore.contains(name)) {
@@ -89,15 +87,13 @@ public class Walker {
       }
       return;
     } else if ("part".equals(name)) {
-    } else if ("".equals(name)) {
-    } else if ("".equals(name)) {
     } else if ("measure".equals(name)) {
       final NodeList nodeList = node.getChildNodes();
-      measureWalker.begin();
+      startMeasure();
       for (int k = 0; k < nodeList.getLength(); k++) {
         measurePart(nodeList.item(k));
       }
-      measureWalker.end();
+      endMeasure();
       return;
     } else {
       System.out.println("unhandled:" + name);
@@ -109,10 +105,19 @@ public class Walker {
     names.add(name);
   }
 
-  public void walk(final NodeList nodeList) throws Exception {
+  private void walk(final NodeList nodeList) throws Exception {
     for (int k = 0; k < nodeList.getLength(); k++) {
       walk(nodeList.item(k));
     }
   }
+  
+  public abstract void startMeasure();
+  
+  public abstract void backup(int duration);
+  
+  public abstract void endMeasure();
 
+  public abstract void note(NoteStruct note);
+  
+  public abstract void unknown(String name);
 }
