@@ -87,6 +87,10 @@ public abstract class NormalizedPianoWalker {
       }
       return;
     } else if ("part".equals(name)) {
+    } else if ("work".equals(name)) {
+    } else if ("work-title".equals(name)) {
+    } else if ("movement-number".equals(name)) {
+    } else if ("movement-title".equals(name)) {
     } else if ("measure".equals(name)) {
       final NodeList nodeList = node.getChildNodes();
       startMeasure();
